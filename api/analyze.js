@@ -1,12 +1,21 @@
-exports.handler = async (event) => {
+module.exports = async (req, res) => {
+  // 添加 CORS 头
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+
   try {
-    const { symbol, question, priceData, recentKlines, apiKey, shortMode } = JSON.parse(event.body)
+    const { symbol, question, priceData, recentKlines, apiKey, shortMode } = req.body
 
     if (!apiKey) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'API Key 不能为空' }) }
+      return res.status(400).json({ error: 'API Key 不能为空' })
     }
 
-    // 构建行情摘要
     let marketContext = `## 当前行情数据\n`
     marketContext += `- 币种: ${symbol}/USDT\n`
     marketContext += `- 当前价格: $${parseFloat(priceData.price).toLocaleString()}\n`
@@ -43,7 +52,6 @@ exports.handler = async (event) => {
       ? `${marketContext}\n\n用户问题：${question}\n\n请用 1-2 句话简要分析。`
       : `${marketContext}\n\n用户问题：${question}\n\n请按分析框架给出详细分析。`
 
-    // 调用 DeepSeek API（兼容 OpenAI 格式）
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
@@ -62,21 +70,12 @@ exports.handler = async (event) => {
 
     const data = await response.json()
     if (!response.ok) {
-      return { statusCode: 500, body: JSON.stringify({ error: data.error?.message || 'API 调用失败' }) }
+      return res.status(500).json({ error: data.error?.message || 'API 调用失败' })
     }
 
-    const reply = data.choices[0].message.content
-
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reply })
-    }
+    return res.json({ reply: data.choices[0].message.content })
   } catch (e) {
     console.error('analyze error:', e)
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: '分析失败: ' + e.message })
-    }
+    return res.status(500).json({ error: e.message })
   }
 }

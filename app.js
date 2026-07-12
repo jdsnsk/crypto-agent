@@ -341,7 +341,9 @@ ${recentKlines.length ? '\n最近5根K线(1h):\n' + recentKlines.map(k => '- ' +
 - 回复用中文，简洁专业
 - 格式用 markdown，适当使用粗体`
 
-    const aiRes = await fetch('https://api.deepseek.com/chat/completions', {
+const corsProxy = 'https://api.allorigins.win/raw?url='
+// ...
+    const aiRes = await fetch(corsProxy + encodeURIComponent('https://api.deepseek.com/chat/completions'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
