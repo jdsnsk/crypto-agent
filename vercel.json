@@ -1,11 +1,11 @@
 {
+  "rewrites": [
+    { "source": "/api/analyze", "destination": "/api/analyze" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "functions": {
     "api/analyze.js": {
-      "includeFiles": "**"
+      "runtime": "nodejs18.x"
     }
-  },
-  "rewrites": [
-    { "source": "/api/analyze", "destination": "/api/analyze.js" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  }
 }
