@@ -341,7 +341,9 @@ ${recentKlines.length ? '\n最近5根K线(1h):\n' + recentKlines.map(k => '- ' +
 - 回复用中文，简洁专业
 - 格式用 markdown，适当使用粗体`
 
-    const aiRes = await fetch('https://api.deepseek.com/chat/completions', {
+const CORS_PROXY = 'https://corsproxy.io/?'
+// ...
+    const aiRes = await fetch(CORS_PROXY + encodeURIComponent('https://api.deepseek.com/chat/completions'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -384,27 +386,24 @@ async function generateReports() {
       const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${coin}USDT`)
       const priceData = await priceRes.json()
 
-      const aiRes = await fetch('/api/analyze', {
+      const aiRes = await fetch(CORS_PROXY + encodeURIComponent('https://api.deepseek.com/chat/completions'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + state.apiKey
+        },
         body: JSON.stringify({
-          symbol: coin,
-          question: '当前市场状况如何？给出简要分析。',
-          priceData: {
-            price: priceData.lastPrice,
-            change24h: priceData.priceChangePercent,
-            high24h: priceData.highPrice,
-            low24h: priceData.lowPrice,
-            volume: priceData.volume
-          },
-          recentKlines: [],
-          apiKey: state.apiKey,
-          shortMode: true
+          model: 'deepseek-chat',
+          max_tokens: 200,
+          messages: [
+            { role: 'system', content: '你是一个加密货币分析师。基于数据给出1-2句极简分析。用中文。' },
+            { role: 'user', content: coin + '/USDT 当前$' + parseFloat(priceData.lastPrice).toLocaleString() + '，24h涨跌' + parseFloat(priceData.priceChangePercent).toFixed(2) + '%。简要分析。' }
+          ]
         })
       })
       const aiData = await aiRes.json()
-
-      const summary = aiData.reply.length > 60 ? aiData.reply.substring(0, 60) + '...' : aiData.reply
+      if (!aiData.choices) continue
+      const summary = aiData.choices[0].message.content
       reportList.innerHTML += `
         <div class="report-item">
           <div>
