@@ -297,7 +297,7 @@ function addMessage(role, content, isTyping = false) {
 
 async function sendMessage(question) {
   if (!question.trim() || !state.apiKey) {
-    if (!state.apiKey) addMessage('ai', '⚠️ 请先在底部设置 Claude API Key')
+    if (!state.apiKey) addMessage('ai', '⚠️ 请先在底部设置 DeepSeek API Key')
     return
   }
 
@@ -338,7 +338,11 @@ async function sendMessage(question) {
 
     // 替换输入消息为实际回复
     typingMsg.remove()
-    addMessage('ai', aiData.reply)
+    if (aiData.error) {
+      addMessage('ai', '⚠️ 分析失败: ' + aiData.error)
+    } else {
+      addMessage('ai', aiData.reply)
+    }
   } catch (e) {
     typingMsg.remove()
     addMessage('ai', '⚠️ 分析请求失败，请检查 API Key 是否正确或稍后重试。')
