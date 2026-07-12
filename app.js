@@ -345,7 +345,8 @@ async function sendMessage(question) {
     }
   } catch (e) {
     typingMsg.remove()
-    addMessage('ai', '⚠️ 分析请求失败，请检查 API Key 是否正确或稍后重试。')
+    console.error('sendMessage error:', e)
+    addMessage('ai', '⚠️ 请求失败: ' + e.message + '。请检查控制台获取详情。')
   } finally {
     sendBtn.disabled = false
   }
