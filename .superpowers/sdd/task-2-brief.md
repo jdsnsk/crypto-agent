@@ -1,3 +1,14 @@
+### Task 2: 主页面 HTML 结构
+
+**Files:**
+- Create: `index.html`
+
+**Interfaces:**
+- Produces: 页面基础骨架，引用 style.css 和 app.js
+
+- [ ] **Step 1: 编写 index.html（基础结构 + 外部引用）**
+
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -90,9 +101,9 @@
   <footer class="footer">
     <div class="settings">
       <div class="setting-item">
-        <label>DeepSeek API Key</label>
+        <label>Claude API Key</label>
         <div class="input-group">
-          <input type="password" id="apiKeyInput" placeholder="sk-..." />
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
           <button class="btn-sm" id="saveKeyBtn">保存</button>
         </div>
       </div>
@@ -111,3 +122,14 @@
   <script src="app.js"></script>
 </body>
 </html>
+```
+
+- [ ] **Step 3: 提交**
+
+```bash
+git add index.html
+git commit -m "feat: 主页面 HTML 结构"
+```
+
+---
+

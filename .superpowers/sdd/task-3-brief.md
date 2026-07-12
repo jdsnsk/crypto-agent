@@ -1,3 +1,11 @@
+### Task 3: 全部样式（深色主题）
+
+**Files:**
+- Create: `style.css`
+
+- [ ] **Step 1: 编写完整样式**
+
+```css
 /* ===== 全局重置 ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -50,9 +58,8 @@ body {
 .ticker-change.down { color: var(--red); }
 
 /* ===== 主布局 ===== */
-.main { display: flex; gap: 16px; padding: 16px 24px; flex: 1; min-height: 0; }
+.main { display: flex; gap: 16px; padding: 16px 24px; height: calc(100vh - 120px); }
 .chart-section { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.ai-section { width: 380px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
 .ai-section { width: 380px; display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
 
 /* ===== 币种切换标签 ===== */
@@ -187,3 +194,14 @@ body {
   .settings { flex-direction: column; gap: 16px; }
   .input-group input { width: 100%; }
 }
+```
+
+- [ ] **Step 2: 提交**
+
+```bash
+git add style.css
+git commit -m "feat: 深色主题完整样式"
+```
+
+---
+
