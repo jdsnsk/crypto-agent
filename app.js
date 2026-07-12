@@ -316,32 +316,53 @@ async function sendMessage(question) {
       time: new Date(k[0]).toLocaleString(), open: k[1], high: k[2], low: k[3], close: k[4], vol: k[5]
     }))
 
-    // 调用后端 AI 分析
-    const aiRes = await fetch('/api/analyze', {
+    // 调用 DeepSeek API（直接从前端调用）
+    const marketData =
+`## 当前行情数据
+- 币种: ${state.currentCoin}/USDT
+- 当前价格: $${parseFloat(priceData.lastPrice).toLocaleString()}
+- 24h涨跌: ${parseFloat(priceData.priceChangePercent) >= 0 ? '+' : ''}${parseFloat(priceData.priceChangePercent).toFixed(2)}%
+- 24h最高: $${parseFloat(priceData.highPrice).toLocaleString()}
+- 24h最低: $${parseFloat(priceData.lowPrice).toLocaleString()}
+${recentKlines.length ? '\n最近5根K线(1h):\n' + recentKlines.map(k => '- ' + k.time + ' O:' + k.open + ' H:' + k.high + ' L:' + k.low + ' C:' + k.close).join('\n') : ''}`
+
+    const systemPrompt = `你是一个专业的加密货币分析师。请基于实时数据进行专业分析。
+
+## 分析框架
+1. **短期趋势判断** — 当前处于上涨/下跌/震荡？关键信号是什么？
+2. **关键价位** — 最近的支撑位和阻力位在哪？
+3. **风险提示** — 当前市场有哪些需要注意的风险？
+4. **操作建议** — 基于分析的参考建议（仅供参考，不构成投资建议）
+
+## 要求
+- 分析要具体，给出明确的价位参考
+- 保持客观，不夸大收益
+- 提示风险
+- 回复用中文，简洁专业
+- 格式用 markdown，适当使用粗体`
+
+    const aiRes = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey
+      },
       body: JSON.stringify({
-        symbol: state.currentCoin,
-        question,
-        priceData: {
-          price: priceData.lastPrice,
-          change24h: priceData.priceChangePercent,
-          high24h: priceData.highPrice,
-          low24h: priceData.lowPrice,
-          volume: priceData.volume
-        },
-        recentKlines,
-        apiKey: state.apiKey
+        model: 'deepseek-chat',
+        max_tokens: 1000,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: marketData + '\n\n用户问题：' + question + '\n\n请按分析框架给出详细分析。' }
+        ]
       })
     })
     const aiData = await aiRes.json()
-
-    // 替换输入消息为实际回复
-    typingMsg.remove()
-    if (aiData.error) {
-      addMessage('ai', '⚠️ 分析失败: ' + aiData.error)
+    if (!aiRes.ok) {
+      typingMsg.remove()
+      addMessage('ai', '⚠️ API 错误: ' + (aiData.error?.message || JSON.stringify(aiData)))
     } else {
-      addMessage('ai', aiData.reply)
+      typingMsg.remove()
+      addMessage('ai', aiData.choices[0].message.content)
     }
   } catch (e) {
     typingMsg.remove()
