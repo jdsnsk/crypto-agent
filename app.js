@@ -316,31 +316,32 @@ async function sendMessage(question) {
       time: new Date(k[0]).toLocaleString(), open: k[1], high: k[2], low: k[3], close: k[4], vol: k[5]
     }))
 
-    // 调用 Vercel 后端 AI 分析
-    const aiRes = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        symbol: state.currentCoin,
-        question,
-        priceData: {
-          price: priceData.lastPrice,
-          change24h: priceData.priceChangePercent,
-          high24h: priceData.highPrice,
-          low24h: priceData.lowPrice,
-          volume: priceData.volume
-        },
-        recentKlines,
-        apiKey: state.apiKey
-      })
-    })
-    const aiData = await aiRes.json()
-    typingMsg.remove()
-    if (aiData.error) {
-      addMessage('ai', '⚠️ ' + aiData.error)
-    } else {
-      addMessage('ai', aiData.reply)
-    }
+    // 调用 DeepSeek API（直接从前端调用）
+    const marketData =
+`## 当前行情数据
+- 币种: ${state.currentCoin}/USDT
+- 当前价格: $${parseFloat(priceData.lastPrice).toLocaleString()}
+- 24h涨跌: ${parseFloat(priceData.priceChangePercent) >= 0 ? '+' : ''}${parseFloat(priceData.priceChangePercent).toFixed(2)}%
+- 24h最高: $${parseFloat(priceData.highPrice).toLocaleString()}
+- 24h最低: $${parseFloat(priceData.lowPrice).toLocaleString()}
+${recentKlines.length ? '\n最近5根K线(1h):\n' + recentKlines.map(k => '- ' + k.time + ' O:' + k.open + ' H:' + k.high + ' L:' + k.low + ' C:' + k.close).join('\n') : ''}`
+
+    const systemPrompt = `你是一个专业的加密货币分析师。请基于实时数据进行专业分析。
+
+## 分析框架
+1. **短期趋势判断** — 当前处于上涨/下跌/震荡？关键信号是什么？
+2. **关键价位** — 最近的支撑位和阻力位在哪？
+3. **风险提示** — 当前市场有哪些需要注意的风险？
+4. **操作建议** — 基于分析的参考建议（仅供参考，不构成投资建议）
+
+## 要求
+- 分析要具体，给出明确的价位参考
+- 保持客观，不夸大收益
+- 提示风险
+- 回复用中文，简洁专业
+- 格式用 markdown，适当使用粗体`
+
+    const aiRes = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -378,6 +379,7 @@ async function generateReports() {
   reportList.innerHTML = '<div class="report-item" style="justify-content:center;color:var(--text-muted)">分析中...</div>'
 
   try {
+    const reports = []
     for (const coin of state.coins.slice(0, 5)) {
       const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${coin}USDT`)
       const priceData = await priceRes.json()
@@ -401,9 +403,8 @@ async function generateReports() {
         })
       })
       const aiData = await aiRes.json()
-      if (aiData.error) continue
-      const summary = aiData.reply
-      const shortSummary = summary.length > 60 ? summary.substring(0, 60) + '...' : summary
+
+      const summary = aiData.reply.length > 60 ? aiData.reply.substring(0, 60) + '...' : aiData.reply
       reportList.innerHTML += `
         <div class="report-item">
           <div>
