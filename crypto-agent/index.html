@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>虚拟币 AI 分析助手</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- TradingView Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo">📊 CryptoAI</h1>
+    </div>
+    <div class="header-right">
+      <span class="header-status" id="status">运行中</span>
+    </div>
+  </header>
+
+  <!-- 顶部行情滚动条 -->
+  <div class="ticker-bar" id="tickerBar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- 主内容区域 -->
+  <main class="main">
+    <!-- 左侧：行情看板 -->
+    <section class="chart-section">
+      <!-- 币种切换标签 -->
+      <div class="coin-tabs" id="coinTabs"></div>
+
+      <!-- 价格概览 -->
+      <div class="price-overview" id="priceOverview"></div>
+
+      <!-- K 线图容器 -->
+      <div class="chart-container">
+        <div class="chart-toolbar">
+          <button class="interval-btn active" data-interval="15m">15m</button>
+          <button class="interval-btn" data-interval="1h">1h</button>
+          <button class="interval-btn" data-interval="4h">4h</button>
+          <button class="interval-btn" data-interval="1d">1d</button>
+        </div>
+        <div id="chart"></div>
+      </div>
+
+      <!-- 数据卡片 -->
+      <div class="data-cards" id="dataCards"></div>
+    </section>
+
+    <!-- 右侧：AI 分析 -->
+    <section class="ai-section">
+      <!-- 自动分析报告 -->
+      <div class="auto-report" id="autoReport">
+        <div class="section-header">
+          <h3>📋 自动分析</h3>
+          <button class="btn-sm" id="refreshReport">刷新</button>
+        </div>
+        <div class="report-list" id="reportList"></div>
+      </div>
+
+      <!-- AI 对话 -->
+      <div class="ai-chat">
+        <div class="section-header">
+          <h3>💬 AI 分析</h3>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message ai">
+            <div class="msg-avatar">🤖</div>
+            <div class="msg-content">你好！我是 CryptoAI 分析师。选择币种后，可以问我"现在怎么看？"、"支撑位在哪？"等问题。</div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <div class="quick-questions" id="quickQuestions">
+            <span class="quick-q" data-q="现在怎么看？">现在怎么看？</span>
+            <span class="quick-q" data-q="支撑位和阻力位在哪？">支撑/阻力位</span>
+            <span class="quick-q" data-q="适合买入吗？">适合买入？</span>
+          </div>
+          <div class="input-row">
+            <input type="text" id="chatInput" placeholder="输入问题..." />
+            <button id="sendBtn">发送</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部设置 -->
+  <footer class="footer">
+    <div class="settings">
+      <div class="setting-item">
+        <label>Claude API Key</label>
+        <div class="input-group">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+          <button class="btn-sm" id="saveKeyBtn">保存</button>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label>自选币种</label>
+        <div class="input-group">
+          <input type="text" id="addCoinInput" placeholder="输入币种，如 SOL" />
+          <button class="btn-sm" id="addCoinBtn">添加</button>
+        </div>
+        <div class="coin-list" id="coinList"></div>
+      </div>
+    </div>
+    <p class="footer-note">数据来源：币安 API · 分析由 AI 生成，仅供参考，不构成投资建议</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
