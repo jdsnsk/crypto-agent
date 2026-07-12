@@ -1,9 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/analyze", "destination": "/api/analyze" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" }
   ]
 }
