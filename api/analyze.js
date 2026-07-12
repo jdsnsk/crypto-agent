@@ -1,5 +1,3 @@
-const Anthropic = require('@anthropic-ai/sdk')
-
 exports.handler = async (event) => {
   try {
     const { symbol, question, priceData, recentKlines, apiKey, shortMode } = JSON.parse(event.body)
@@ -7,8 +5,6 @@ exports.handler = async (event) => {
     if (!apiKey) {
       return { statusCode: 400, body: JSON.stringify({ error: 'API Key 不能为空' }) }
     }
-
-    const anthropic = new Anthropic({ apiKey })
 
     // 构建行情摘要
     let marketContext = `## 当前行情数据\n`
@@ -47,14 +43,29 @@ exports.handler = async (event) => {
       ? `${marketContext}\n\n用户问题：${question}\n\n请用 1-2 句话简要分析。`
       : `${marketContext}\n\n用户问题：${question}\n\n请按分析框架给出详细分析。`
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: shortMode ? 300 : 1000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMessage }]
+    // 调用 DeepSeek API（兼容 OpenAI 格式）
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        max_tokens: shortMode ? 300 : 1000,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ]
+      })
     })
 
-    const reply = response.content[0].text
+    const data = await response.json()
+    if (!response.ok) {
+      return { statusCode: 500, body: JSON.stringify({ error: data.error?.message || 'API 调用失败' }) }
+    }
+
+    const reply = data.choices[0].message.content
 
     return {
       statusCode: 200,
