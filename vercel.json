@@ -1,12 +1,12 @@
 {
   "builds": [
     { "src": "api/analyze.js", "use": "@vercel/node" },
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "*.css", "use": "@vercel/static" },
-    { "src": "*.js", "use": "@vercel/static" }
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "style.css", "use": "@vercel/static" },
+    { "src": "app.js", "use": "@vercel/static" }
   ],
   "rewrites": [
-    { "source": "/api/analyze", "destination": "/api/analyze.js" },
+    { "source": "/api/analyze", "destination": "/api/analyze" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
